@@ -109,10 +109,11 @@ export default function App() {
   const [activeView, setActiveView] = useState("trend");
 
   const loadData = (view) => {
-    let endpoint = "/api/trending";
-    if (view === "investments") endpoint = "/api/investments";
-    if (view === "hiring") endpoint = "/api/hiring";
-    if (view === "risk") endpoint = "/api/risk";
+let endpoint = "/api/trending";
+if (view === "investments") endpoint = "/api/investments";
+if (view === "hiring") endpoint = "/api/hiring";
+if (view === "risk") endpoint = "/api/risk";
+if (view === "discovery") endpoint = "/api/discovery";
 
     fetch(endpoint)
       .then((res) => res.json())
@@ -206,10 +207,11 @@ export default function App() {
       <h1 style={{ fontSize: 32, marginBottom: 20 }}>Satış İstihbarat Paneli</h1>
 
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
-        <button style={tabStyle("trend")} onClick={() => setActiveView("trend")}>Trend</button>
-        <button style={tabStyle("investments")} onClick={() => setActiveView("investments")}>Yatırım</button>
-        <button style={tabStyle("hiring")} onClick={() => setActiveView("hiring")}>İşe Alım</button>
-        <button style={tabStyle("risk")} onClick={() => setActiveView("risk")}>Risk / Dönüşüm</button>
+<button style={tabStyle("trend")} onClick={() => setActiveView("trend")}>Trend</button>
+<button style={tabStyle("investments")} onClick={() => setActiveView("investments")}>Yatırım</button>
+<button style={tabStyle("hiring")} onClick={() => setActiveView("hiring")}>İşe Alım</button>
+<button style={tabStyle("risk")} onClick={() => setActiveView("risk")}>Risk / Dönüşüm</button>
+<button style={tabStyle("discovery")} onClick={() => setActiveView("discovery")}>Keşifler</button>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 24 }}>
