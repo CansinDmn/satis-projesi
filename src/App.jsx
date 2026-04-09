@@ -9,6 +9,8 @@ const defaultCompanies = [
     score: 91,
     opportunityType: "İşe Alım + Eğitim",
     note: "Hızlı büyüme",
+    headlines: ["Papara için örnek haber başlığı"],
+    signals: ["Yatırım", "Büyüme"]
   },
   {
     id: 2,
@@ -17,6 +19,8 @@ const defaultCompanies = [
     score: 88,
     opportunityType: "İşe Alım",
     note: "Scale-up",
+    headlines: ["Midas için örnek haber başlığı"],
+    signals: ["İşe Alım"]
   },
   {
     id: 3,
@@ -25,6 +29,8 @@ const defaultCompanies = [
     score: 90,
     opportunityType: "İşe Alım + Eğitim",
     note: "Global büyüme",
+    headlines: ["Insider için örnek haber başlığı"],
+    signals: ["Büyüme", "Dönüşüm"]
   }
 ];
 
@@ -53,6 +59,15 @@ function badgeStyle(type) {
   return { background: "#052e16", color: "#4ade80" };
 }
 
+function signalStyle(signal) {
+  if (signal === "Yatırım") return { background: "#052e16", color: "#4ade80" };
+  if (signal === "İşe Alım") return { background: "#082f49", color: "#38bdf8" };
+  if (signal === "Büyüme") return { background: "#3f1d0b", color: "#fb923c" };
+  if (signal === "Dönüşüm") return { background: "#312e81", color: "#a78bfa" };
+  if (signal === "Risk") return { background: "#450a0a", color: "#f87171" };
+  return { background: "#334155", color: "#e2e8f0" };
+}
+
 function scoreColor(score) {
   if (score >= 90) return "#22c55e";
   if (score >= 80) return "#38bdf8";
@@ -62,63 +77,33 @@ function scoreColor(score) {
 function getTrainingTopics(company) {
   const s = (company.sector || "").toLowerCase();
 
-  if (s.includes("fintech")) {
-    return ["Karar alma", "Risk yönetimi", "Fonksiyonlar arası iş birliği"];
-  }
-  if (s.includes("oyun")) {
-    return ["Orta kademe liderlik", "Delegasyon", "Ekip performansı"];
-  }
-  if (s.includes("saas") || s.includes("yazılım") || s.includes("tech")) {
-    return ["Liderlik", "Ölçeklenme yönetimi", "Karar kalitesi"];
-  }
-  if (s.includes("enerji")) {
-    return ["Süreç iyileştirme", "Operasyonel mükemmellik", "Liderlik"];
-  }
-  if (s.includes("e-ticaret") || s.includes("perakende")) {
-    return ["Müşteri deneyimi", "Süreç yönetimi", "Ekip koordinasyonu"];
-  }
+  if (s.includes("fintech")) return ["Karar alma", "Risk yönetimi", "Fonksiyonlar arası iş birliği"];
+  if (s.includes("oyun")) return ["Orta kademe liderlik", "Delegasyon", "Ekip performansı"];
+  if (s.includes("saas") || s.includes("yazılım") || s.includes("tech")) return ["Liderlik", "Ölçeklenme yönetimi", "Karar kalitesi"];
+  if (s.includes("enerji")) return ["Süreç iyileştirme", "Operasyonel mükemmellik", "Liderlik"];
+  if (s.includes("e-ticaret") || s.includes("perakende")) return ["Müşteri deneyimi", "Süreç yönetimi", "Ekip koordinasyonu"];
   return ["Liderlik", "Karar alma", "İş birliği"];
 }
 
 function getHiringRoles(company) {
   const s = (company.sector || "").toLowerCase();
 
-  if (s.includes("fintech")) {
-    return ["Product Manager", "Compliance Specialist", "Data Analyst"];
-  }
-  if (s.includes("oyun")) {
-    return ["Game Producer", "UA Manager", "People Partner"];
-  }
-  if (s.includes("saas") || s.includes("yazılım") || s.includes("tech")) {
-    return ["Product", "Engineering", "Customer Success"];
-  }
-  if (s.includes("enerji")) {
-    return ["Operasyon Yöneticisi", "Proje Kontrol", "Süreç Geliştirme"];
-  }
-  if (s.includes("e-ticaret") || s.includes("perakende")) {
-    return ["Category Manager", "CX Lead", "Operations Manager"];
-  }
+  if (s.includes("fintech")) return ["Product Manager", "Compliance Specialist", "Data Analyst"];
+  if (s.includes("oyun")) return ["Game Producer", "UA Manager", "People Partner"];
+  if (s.includes("saas") || s.includes("yazılım") || s.includes("tech")) return ["Product", "Engineering", "Customer Success"];
+  if (s.includes("enerji")) return ["Operasyon Yöneticisi", "Proje Kontrol", "Süreç Geliştirme"];
+  if (s.includes("e-ticaret") || s.includes("perakende")) return ["Category Manager", "CX Lead", "Operations Manager"];
   return ["Kritik rol analizi gerekli"];
 }
 
 function getTargetRoles(company) {
   const s = (company.sector || "").toLowerCase();
 
-  if (s.includes("fintech")) {
-    return ["CHRO", "Talent Acquisition Lead", "Product Director"];
-  }
-  if (s.includes("oyun")) {
-    return ["People Lead", "Studio Director", "Founder"];
-  }
-  if (s.includes("saas") || s.includes("yazılım") || s.includes("tech")) {
-    return ["Head of People", "VP Product", "Founder"];
-  }
-  if (s.includes("enerji")) {
-    return ["İK Direktörü", "Operasyon Direktörü", "L&D Manager"];
-  }
-  if (s.includes("e-ticaret") || s.includes("perakende")) {
-    return ["HR Director", "Operations Director", "CX Director"];
-  }
+  if (s.includes("fintech")) return ["CHRO", "Talent Acquisition Lead", "Product Director"];
+  if (s.includes("oyun")) return ["People Lead", "Studio Director", "Founder"];
+  if (s.includes("saas") || s.includes("yazılım") || s.includes("tech")) return ["Head of People", "VP Product", "Founder"];
+  if (s.includes("enerji")) return ["İK Direktörü", "Operasyon Direktörü", "L&D Manager"];
+  if (s.includes("e-ticaret") || s.includes("perakende")) return ["HR Director", "Operations Director", "CX Director"];
   return ["İK", "Operasyon", "Genel Müdür"];
 }
 
@@ -160,7 +145,9 @@ export default function App() {
               sector,
               score,
               opportunityType: buildOpportunity(sector),
-              note: row.Not || "Yüklenen şirket verisi üzerinden otomatik fırsat analizi oluşturuldu."
+              note: row.Not || "Yüklenen şirket verisi üzerinden otomatik fırsat analizi oluşturuldu.",
+              headlines: row.Haber ? [row.Haber] : [],
+              signals: row.Sinyal ? [row.Sinyal] : []
             };
           });
 
@@ -288,7 +275,7 @@ export default function App() {
       </div>
 
       <div style={{ marginBottom: 16, fontSize: 13, color: "#94a3b8" }}>
-        CSV formatı: <b>SirketAdi,Sektor,Not</b>
+        CSV formatı: <b>SirketAdi,Sektor,Not,Haber,Sinyal</b>
       </div>
 
       <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
@@ -342,14 +329,53 @@ export default function App() {
           <h2>{selected.name}</h2>
           <p>{selected.sector}</p>
 
-          <div>
+          <div style={{ marginBottom: 16 }}>
             <h3>Fırsat</h3>
             <p>{selected.opportunityType}</p>
           </div>
 
-          <div>
-            <h3>Not</h3>
+          <div style={{ marginBottom: 16 }}>
+            <h3>Neden sıcak?</h3>
             <p>{selected.note}</p>
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <h3>Sinyaller</h3>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {(selected.signals || []).length ? (
+                selected.signals.map((signal) => {
+                  const tag = signalStyle(signal);
+                  return (
+                    <span
+                      key={signal}
+                      style={{
+                        ...tag,
+                        padding: "6px 10px",
+                        borderRadius: 999,
+                        fontSize: 12
+                      }}
+                    >
+                      {signal}
+                    </span>
+                  );
+                })
+              ) : (
+                <span style={{ color: "#94a3b8" }}>Sinyal bulunamadı</span>
+              )}
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <h3>Haber başlıkları</h3>
+            {(selected.headlines || []).length ? (
+              <ul style={{ paddingLeft: 18, lineHeight: 1.7 }}>
+                {selected.headlines.map((item, idx) => (
+                  <li key={`${item}-${idx}`}>{item}</li>
+                ))}
+              </ul>
+            ) : (
+              <p style={{ color: "#94a3b8" }}>Haber başlığı bulunamadı</p>
+            )}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 20, marginBottom: 20 }}>
