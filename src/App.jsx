@@ -1,14 +1,13 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
-const companies = [
+const defaultCompanies = [
   {
     id: 1,
     name: "Papara",
     sector: "Fintech",
     score: 91,
     opportunityType: "İşe Alım + Eğitim",
-    note: "Hızlı büyüme ve kritik rol ihtiyacı",
-    message: "Fintech büyümesinde işe alım ve organizasyon desteği sunabiliriz."
+    note: "Hızlı büyüme",
   },
   {
     id: 2,
@@ -16,8 +15,7 @@ const companies = [
     sector: "Fintech",
     score: 88,
     opportunityType: "İşe Alım",
-    note: "Scale-up aşamasında ekip kurulumu",
-    message: "Kritik rollerin doğru konumlanması için destek olabiliriz."
+    note: "Scale-up",
   },
   {
     id: 3,
@@ -26,19 +24,38 @@ const companies = [
     score: 90,
     opportunityType: "İşe Alım + Eğitim",
     note: "Global büyüme",
-    message: "Global ekiplerde liderlik ve yapı kurma desteği sunuyoruz."
   }
 ];
 
+function buildMessage(company) {
+  return `Merhaba, ${company.name} tarafında ${company.sector} sektöründeki büyüme dinamiklerine bağlı olarak özellikle ${company.opportunityType.toLowerCase()} alanında destek olabileceğimizi düşünüyorum. Uygun olursa kısa bir görüşme yapabilir miyiz?`;
+}
+
 export default function App() {
-  const [selected, setSelected] = useState(companies[0]);
+  const [companies, setCompanies] = useState(defaultCompanies);
+  const [selected, setSelected] = useState(defaultCompanies[0]);
   const [query, setQuery] = useState("");
+
+  // 🔥 OTOMATİK API ÇEK
+  useEffect(() => {
+    fetch("/api/trending")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.length) {
+          setCompanies(data);
+          setSelected(data[0]);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const filtered = useMemo(() => {
     return companies.filter((c) =>
       c.name.toLowerCase().includes(query.toLowerCase())
     );
-  }, [query]);
+  }, [query, companies]);
+
+  const message = buildMessage(selected);
 
   return (
     <div style={{ background: "#0f172a", color: "#fff", minHeight: "100vh", padding: 30 }}>
@@ -82,7 +99,7 @@ export default function App() {
           <h2>{selected.name}</h2>
           <p>{selected.sector}</p>
 
-          <div style={{ marginTop: 20 }}>
+          <div>
             <h3>Fırsat</h3>
             <p>{selected.opportunityType}</p>
           </div>
@@ -94,7 +111,25 @@ export default function App() {
 
           <div>
             <h3>Satış Mesajı</h3>
-            <p>{selected.message}</p>
+            <p>{message}</p>
+
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(message);
+                alert("Kopyalandı");
+              }}
+              style={{
+                marginTop: 10,
+                padding: 10,
+                borderRadius: 8,
+                border: "none",
+                background: "#22c55e",
+                color: "#fff",
+                cursor: "pointer"
+              }}
+            >
+              Mesajı Kopyala
+            </button>
           </div>
         </div>
       </div>
