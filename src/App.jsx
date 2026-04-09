@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import Papa from "papaparse";
 
 const defaultCompanies = [
   {
@@ -31,6 +32,17 @@ function buildMessage(company) {
   return `Merhaba, ${company.name} tarafında ${company.sector} sektöründeki büyüme dinamikleri doğrultusunda özellikle ${company.opportunityType.toLowerCase()} alanında destek olabileceğimizi düşünüyorum. Özellikle ${company.note.toLowerCase()} başlığı burada dikkat çekiyor. Uygun olursa kısa bir görüşme yapabilir miyiz?`;
 }
 
+function buildOpportunity(sector) {
+  const s = (sector || "").toLowerCase();
+
+  if (s.includes("fintech")) return "İşe Alım + Eğitim";
+  if (s.includes("oyun")) return "Eğitim";
+  if (s.includes("saas") || s.includes("yazılım") || s.includes("tech")) return "İşe Alım + Eğitim";
+  if (s.includes("enerji")) return "Eğitim";
+  if (s.includes("e-ticaret") || s.includes("perakende")) return "Eğitim";
+  return "İşe Alım + Eğitim";
+}
+
 export default function App() {
   const [companies, setCompanies] = useState(defaultCompanies);
   const [selected, setSelected] = useState(defaultCompanies[0]);
@@ -48,6 +60,46 @@ export default function App() {
       })
       .catch(() => {});
   }, []);
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        const parsed = (results.data || [])
+          .filter((row) => row.SirketAdi)
+          .map((row, index) => {
+            const sector = row.Sektor || "Genel";
+            const score = Math.floor(Math.random() * 25) + 70;
+
+            const company = {
+              id: index + 1000,
+              name: row.SirketAdi,
+              sector,
+              score,
+              opportunityType: buildOpportunity(sector),
+              note: row.Not || "Yüklenen şirket verisi üzerinden otomatik fırsat analizi oluşturuldu."
+            };
+
+            return company;
+          });
+
+        if (parsed.length > 0) {
+          const merged = [...parsed, ...companies];
+          setCompanies(merged);
+          setSelected(parsed[0]);
+          setQuery("");
+          setSectorFilter("Tümü");
+          alert("CSV başarıyla yüklendi.");
+        } else {
+          alert("Geçerli veri bulunamadı. CSV'de SirketAdi ve Sektor kolonları olmalı.");
+        }
+      }
+    });
+  };
 
   const sectors = useMemo(() => {
     return ["Tümü", ...new Set(companies.map((c) => c.sector))];
@@ -99,7 +151,7 @@ export default function App() {
           onChange={(e) => setQuery(e.target.value)}
           style={{
             padding: 12,
-            width: 280,
+            width: 260,
             borderRadius: 10,
             border: "none"
           }}
@@ -120,6 +172,12 @@ export default function App() {
             </option>
           ))}
         </select>
+
+        <input type="file" accept=".csv" onChange={handleFileUpload} />
+      </div>
+
+      <div style={{ marginBottom: 16, fontSize: 13, color: "#94a3b8" }}>
+        CSV formatı: <b>SirketAdi,Sektor,Not</b>
       </div>
 
       <div style={{ display: "flex", gap: 20 }}>
