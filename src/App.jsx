@@ -7,9 +7,8 @@ const companies = [
     sector: "Fintech",
     score: 91,
     opportunityType: "İşe Alım + Eğitim",
-    note: "Hızlı büyüme, rol netliği ve karar mekanizması ihtiyacı",
-    message:
-      "Merhaba, Papara tarafında büyüme ile birlikte rol netliği ve karar mekanizmaları kritik hale geliyor. Bu noktada işe alım ve gelişim tarafında destek olabiliriz."
+    note: "Hızlı büyüme ve kritik rol ihtiyacı",
+    message: "Fintech büyümesinde işe alım ve organizasyon desteği sunabiliriz."
   },
   {
     id: 2,
@@ -17,91 +16,88 @@ const companies = [
     sector: "Fintech",
     score: 88,
     opportunityType: "İşe Alım",
-    note: "Scale-up aşamasında kritik rol ihtiyacı",
-    message:
-      "Merhaba, Midas büyüme sürecinde kritik rollerin doğru konumlanması önemli hale geliyor. Bu noktada işe alım desteği sunabiliriz."
+    note: "Scale-up aşamasında ekip kurulumu",
+    message: "Kritik rollerin doğru konumlanması için destek olabiliriz."
   },
   {
     id: 3,
-    name: "Good Job Games",
-    sector: "Oyun",
-    score: 84,
-    opportunityType: "Eğitim",
-    note: "Orta kademe liderlik gelişimi kritik",
-    message:
-      "Merhaba, hızlı büyüyen ekiplerde liderlik ve delegasyon başlıkları kritik hale geliyor. Bu alanda gelişim çözümleri sunabiliriz."
+    name: "Insider",
+    sector: "SaaS",
+    score: 90,
+    opportunityType: "İşe Alım + Eğitim",
+    note: "Global büyüme",
+    message: "Global ekiplerde liderlik ve yapı kurma desteği sunuyoruz."
   }
 ];
 
-function scoreColor(score) {
-  if (score >= 85) return "#ff4d6d";
-  if (score >= 75) return "#ff9f1c";
-  return "#2ec4b6";
-}
-
 export default function App() {
-  const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(companies[0]);
+  const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
-    return companies.filter(
-      (c) =>
-        c.name.toLowerCase().includes(query.toLowerCase()) ||
-        c.sector.toLowerCase().includes(query.toLowerCase()) ||
-        c.opportunityType.toLowerCase().includes(query.toLowerCase())
+    return companies.filter((c) =>
+      c.name.toLowerCase().includes(query.toLowerCase())
     );
   }, [query]);
 
   return (
-    <div style={{ fontFamily: "Arial", padding: 20, background: "#f5f7fb", minHeight: "100vh" }}>
-      <h1 style={{ marginBottom: 20 }}>Satış İstihbarat Paneli</h1>
+    <div style={{ background: "#0f172a", color: "#fff", minHeight: "100vh", padding: 30 }}>
+      <h1 style={{ fontSize: 32, marginBottom: 20 }}>Satış İstihbarat Paneli</h1>
 
       <input
         placeholder="Şirket ara..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         style={{
-          padding: 10,
+          padding: 12,
           width: "100%",
+          borderRadius: 10,
           marginBottom: 20,
-          borderRadius: 8,
-          border: "1px solid #ddd"
+          border: "none"
         }}
       />
 
       <div style={{ display: "flex", gap: 20 }}>
-        <div style={{ width: "40%" }}>
+        <div style={{ width: "35%" }}>
           {filtered.map((c) => (
             <div
               key={c.id}
               onClick={() => setSelected(c)}
               style={{
-                background: "#fff",
+                background: "#1e293b",
                 padding: 15,
+                borderRadius: 12,
                 marginBottom: 10,
-                borderRadius: 10,
-                cursor: "pointer",
-                border: selected.id === c.id ? "2px solid blue" : "1px solid #ddd"
+                cursor: "pointer"
               }}
             >
               <b>{c.name}</b>
               <div>{c.sector}</div>
-              <div style={{ color: scoreColor(c.score) }}>Skor: {c.score}</div>
+              <div style={{ color: "#38bdf8" }}>Skor: {c.score}</div>
             </div>
           ))}
         </div>
 
-        <div style={{ width: "60%", background: "#fff", padding: 20, borderRadius: 10 }}>
+        <div style={{ width: "65%", background: "#1e293b", padding: 20, borderRadius: 12 }}>
           <h2>{selected.name}</h2>
-          <p><b>Sektör:</b> {selected.sector}</p>
-          <p><b>Fırsat:</b> {selected.opportunityType}</p>
-          <p><b>Not:</b> {selected.note}</p>
-          <hr />
-          <h3>Satış Mesajı</h3>
-          <p>{selected.message}</p>
+          <p>{selected.sector}</p>
+
+          <div style={{ marginTop: 20 }}>
+            <h3>Fırsat</h3>
+            <p>{selected.opportunityType}</p>
+          </div>
+
+          <div>
+            <h3>Not</h3>
+            <p>{selected.note}</p>
+          </div>
+
+          <div>
+            <h3>Satış Mesajı</h3>
+            <p>{selected.message}</p>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
