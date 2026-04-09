@@ -43,6 +43,22 @@ function buildOpportunity(sector) {
   return "İşe Alım + Eğitim";
 }
 
+function badgeStyle(type) {
+  if (type === "İşe Alım") {
+    return { background: "#082f49", color: "#38bdf8" };
+  }
+  if (type === "Eğitim") {
+    return { background: "#3f1d0b", color: "#fb923c" };
+  }
+  return { background: "#052e16", color: "#4ade80" };
+}
+
+function scoreColor(score) {
+  if (score >= 90) return "#22c55e";
+  if (score >= 80) return "#38bdf8";
+  return "#f59e0b";
+}
+
 export default function App() {
   const [companies, setCompanies] = useState(defaultCompanies);
   const [selected, setSelected] = useState(defaultCompanies[0]);
@@ -75,7 +91,7 @@ export default function App() {
             const sector = row.Sektor || "Genel";
             const score = Math.floor(Math.random() * 25) + 70;
 
-            const company = {
+            return {
               id: index + 1000,
               name: row.SirketAdi,
               sector,
@@ -83,8 +99,6 @@ export default function App() {
               opportunityType: buildOpportunity(sector),
               note: row.Not || "Yüklenen şirket verisi üzerinden otomatik fırsat analizi oluşturuldu."
             };
-
-            return company;
           });
 
         if (parsed.length > 0) {
@@ -119,6 +133,7 @@ export default function App() {
   }, [query, companies, sectorFilter]);
 
   const hottest = [...companies].sort((a, b) => b.score - a.score).slice(0, 3);
+  const actionList = [...companies].sort((a, b) => b.score - a.score).slice(0, 5);
   const message = buildMessage(selected);
 
   return (
@@ -139,9 +154,39 @@ export default function App() {
             <div style={{ fontSize: 13, color: "#94a3b8", marginBottom: 6 }}>En sıcak şirket</div>
             <div style={{ fontWeight: 700, fontSize: 18 }}>{c.name}</div>
             <div style={{ fontSize: 14 }}>{c.sector}</div>
-            <div style={{ color: "#38bdf8", marginTop: 8 }}>Skor: {c.score}</div>
+            <div style={{ color: scoreColor(c.score), marginTop: 8 }}>Skor: {c.score}</div>
           </div>
         ))}
+      </div>
+
+      <div
+        style={{
+          background: "#111827",
+          border: "1px solid #334155",
+          borderRadius: 12,
+          padding: 16,
+          marginBottom: 24
+        }}
+      >
+        <h3 style={{ marginTop: 0 }}>Bugün yazılacak 5 şirket</h3>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {actionList.map((c) => (
+            <div
+              key={c.id}
+              style={{
+                background: "#1e293b",
+                border: "1px solid #334155",
+                borderRadius: 10,
+                padding: "10px 12px",
+                minWidth: 180
+              }}
+            >
+              <div style={{ fontWeight: 700 }}>{c.name}</div>
+              <div style={{ fontSize: 13, color: "#94a3b8" }}>{c.sector}</div>
+              <div style={{ fontSize: 13, color: scoreColor(c.score) }}>Skor: {c.score}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
@@ -182,27 +227,49 @@ export default function App() {
 
       <div style={{ display: "flex", gap: 20 }}>
         <div style={{ width: "35%" }}>
-          {filtered.map((c) => (
-            <div
-              key={c.id}
-              onClick={() => setSelected(c)}
-              style={{
-                background: "#1e293b",
-                padding: 15,
-                borderRadius: 12,
-                marginBottom: 10,
-                cursor: "pointer",
-                border: selected.id === c.id ? "2px solid #38bdf8" : "1px solid #334155"
-              }}
-            >
-              <b>{c.name}</b>
-              <div>{c.sector}</div>
-              <div style={{ color: "#38bdf8" }}>Skor: {c.score}</div>
-              <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 6 }}>
-                {c.opportunityType}
+          {filtered.map((c) => {
+            const tag = badgeStyle(c.opportunityType);
+
+            return (
+              <div
+                key={c.id}
+                onClick={() => setSelected(c)}
+                style={{
+                  background: "#1e293b",
+                  padding: 15,
+                  borderRadius: 12,
+                  marginBottom: 10,
+                  cursor: "pointer",
+                  border: selected.id === c.id ? "2px solid #38bdf8" : "1px solid #334155"
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                  <div>
+                    <b>{c.name}</b>
+                    <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 4 }}>{c.sector}</div>
+                  </div>
+                  <div style={{ color: scoreColor(c.score), fontWeight: 700 }}>#{c.score}</div>
+                </div>
+
+                <div
+                  style={{
+                    ...tag,
+                    display: "inline-block",
+                    marginTop: 10,
+                    padding: "4px 8px",
+                    borderRadius: 999,
+                    fontSize: 12
+                  }}
+                >
+                  {c.opportunityType}
+                </div>
+
+                <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 10 }}>
+                  {c.note}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div style={{ width: "65%", background: "#1e293b", padding: 20, borderRadius: 12 }}>
@@ -221,7 +288,7 @@ export default function App() {
 
           <div>
             <h3>Satış Mesajı</h3>
-            <p>{message}</p>
+            <p style={{ lineHeight: 1.7 }}>{message}</p>
 
             <button
               onClick={() => {
