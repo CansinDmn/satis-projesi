@@ -50,12 +50,8 @@ function buildOpportunity(sector) {
 }
 
 function badgeStyle(type) {
-  if (type === "İşe Alım") {
-    return { background: "#082f49", color: "#38bdf8" };
-  }
-  if (type === "Eğitim") {
-    return { background: "#3f1d0b", color: "#fb923c" };
-  }
+  if (type === "İşe Alım") return { background: "#082f49", color: "#38bdf8" };
+  if (type === "Eğitim") return { background: "#3f1d0b", color: "#fb923c" };
   return { background: "#052e16", color: "#4ade80" };
 }
 
@@ -65,6 +61,7 @@ function signalStyle(signal) {
   if (signal === "Büyüme") return { background: "#3f1d0b", color: "#fb923c" };
   if (signal === "Dönüşüm") return { background: "#312e81", color: "#a78bfa" };
   if (signal === "Risk") return { background: "#450a0a", color: "#f87171" };
+  if (signal === "Operasyon") return { background: "#3f3f46", color: "#e4e4e7" };
   return { background: "#334155", color: "#e2e8f0" };
 }
 
@@ -76,7 +73,6 @@ function scoreColor(score) {
 
 function getTrainingTopics(company) {
   const s = (company.sector || "").toLowerCase();
-
   if (s.includes("fintech")) return ["Karar alma", "Risk yönetimi", "Fonksiyonlar arası iş birliği"];
   if (s.includes("oyun")) return ["Orta kademe liderlik", "Delegasyon", "Ekip performansı"];
   if (s.includes("saas") || s.includes("yazılım") || s.includes("tech")) return ["Liderlik", "Ölçeklenme yönetimi", "Karar kalitesi"];
@@ -87,7 +83,6 @@ function getTrainingTopics(company) {
 
 function getHiringRoles(company) {
   const s = (company.sector || "").toLowerCase();
-
   if (s.includes("fintech")) return ["Product Manager", "Compliance Specialist", "Data Analyst"];
   if (s.includes("oyun")) return ["Game Producer", "UA Manager", "People Partner"];
   if (s.includes("saas") || s.includes("yazılım") || s.includes("tech")) return ["Product", "Engineering", "Customer Success"];
@@ -98,7 +93,6 @@ function getHiringRoles(company) {
 
 function getTargetRoles(company) {
   const s = (company.sector || "").toLowerCase();
-
   if (s.includes("fintech")) return ["CHRO", "Talent Acquisition Lead", "Product Director"];
   if (s.includes("oyun")) return ["People Lead", "Studio Director", "Founder"];
   if (s.includes("saas") || s.includes("yazılım") || s.includes("tech")) return ["Head of People", "VP Product", "Founder"];
@@ -112,18 +106,30 @@ export default function App() {
   const [selected, setSelected] = useState(defaultCompanies[0]);
   const [query, setQuery] = useState("");
   const [sectorFilter, setSectorFilter] = useState("Tümü");
+  const [activeView, setActiveView] = useState("trend");
 
-  useEffect(() => {
-    fetch("/api/trending")
+  const loadData = (view) => {
+    let endpoint = "/api/trending";
+    if (view === "investments") endpoint = "/api/investments";
+    if (view === "hiring") endpoint = "/api/hiring";
+    if (view === "risk") endpoint = "/api/risk";
+
+    fetch(endpoint)
       .then((res) => res.json())
       .then((data) => {
         if (data?.length) {
           setCompanies(data);
           setSelected(data[0]);
+          setQuery("");
+          setSectorFilter("Tümü");
         }
       })
       .catch(() => {});
-  }, []);
+  };
+
+  useEffect(() => {
+    loadData(activeView);
+  }, [activeView]);
 
   const handleFileUpload = (event) => {
     const file = event.target.files?.[0];
@@ -165,9 +171,7 @@ export default function App() {
     });
   };
 
-  const sectors = useMemo(() => {
-    return ["Tümü", ...new Set(companies.map((c) => c.sector))];
-  }, [companies]);
+  const sectors = useMemo(() => ["Tümü", ...new Set(companies.map((c) => c.sector))], [companies]);
 
   const filtered = useMemo(() => {
     return companies.filter((c) => {
@@ -175,8 +179,7 @@ export default function App() {
         c.name.toLowerCase().includes(query.toLowerCase()) ||
         c.sector.toLowerCase().includes(query.toLowerCase());
 
-      const matchesSector =
-        sectorFilter === "Tümü" || c.sector === sectorFilter;
+      const matchesSector = sectorFilter === "Tümü" || c.sector === sectorFilter;
 
       return matchesQuery && matchesSector;
     });
@@ -189,21 +192,29 @@ export default function App() {
   const hiringRoles = getHiringRoles(selected);
   const targetRoles = getTargetRoles(selected);
 
+  const tabStyle = (key) => ({
+    padding: "10px 14px",
+    borderRadius: 10,
+    border: activeView === key ? "1px solid #38bdf8" : "1px solid #334155",
+    background: activeView === key ? "#082f49" : "#1e293b",
+    color: activeView === key ? "#38bdf8" : "#fff",
+    cursor: "pointer"
+  });
+
   return (
     <div style={{ background: "#0f172a", color: "#fff", minHeight: "100vh", padding: 30 }}>
       <h1 style={{ fontSize: 32, marginBottom: 20 }}>Satış İstihbarat Paneli</h1>
 
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
+        <button style={tabStyle("trend")} onClick={() => setActiveView("trend")}>Trend</button>
+        <button style={tabStyle("investments")} onClick={() => setActiveView("investments")}>Yatırım</button>
+        <button style={tabStyle("hiring")} onClick={() => setActiveView("hiring")}>İşe Alım</button>
+        <button style={tabStyle("risk")} onClick={() => setActiveView("risk")}>Risk / Dönüşüm</button>
+      </div>
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 24 }}>
         {hottest.map((c) => (
-          <div
-            key={c.id}
-            style={{
-              background: "#1e293b",
-              padding: 16,
-              borderRadius: 12,
-              border: "1px solid #334155"
-            }}
-          >
+          <div key={c.id} style={{ background: "#1e293b", padding: 16, borderRadius: 12, border: "1px solid #334155" }}>
             <div style={{ fontSize: 13, color: "#94a3b8", marginBottom: 6 }}>En sıcak şirket</div>
             <div style={{ fontWeight: 700, fontSize: 18 }}>{c.name}</div>
             <div style={{ fontSize: 14 }}>{c.sector}</div>
@@ -212,28 +223,11 @@ export default function App() {
         ))}
       </div>
 
-      <div
-        style={{
-          background: "#111827",
-          border: "1px solid #334155",
-          borderRadius: 12,
-          padding: 16,
-          marginBottom: 24
-        }}
-      >
+      <div style={{ background: "#111827", border: "1px solid #334155", borderRadius: 12, padding: 16, marginBottom: 24 }}>
         <h3 style={{ marginTop: 0 }}>Bugün yazılacak 5 şirket</h3>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           {actionList.map((c) => (
-            <div
-              key={c.id}
-              style={{
-                background: "#1e293b",
-                border: "1px solid #334155",
-                borderRadius: 10,
-                padding: "10px 12px",
-                minWidth: 180
-              }}
-            >
+            <div key={c.id} style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 10, padding: "10px 12px", minWidth: 180 }}>
               <div style={{ fontWeight: 700 }}>{c.name}</div>
               <div style={{ fontSize: 13, color: "#94a3b8" }}>{c.sector}</div>
               <div style={{ fontSize: 13, color: scoreColor(c.score) }}>Skor: {c.score}</div>
@@ -247,27 +241,16 @@ export default function App() {
           placeholder="Şirket ara..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          style={{
-            padding: 12,
-            width: 260,
-            borderRadius: 10,
-            border: "none"
-          }}
+          style={{ padding: 12, width: 260, borderRadius: 10, border: "none" }}
         />
 
         <select
           value={sectorFilter}
           onChange={(e) => setSectorFilter(e.target.value)}
-          style={{
-            padding: 12,
-            borderRadius: 10,
-            border: "none"
-          }}
+          style={{ padding: 12, borderRadius: 10, border: "none" }}
         >
           {sectors.map((sector) => (
-            <option key={sector} value={sector}>
-              {sector}
-            </option>
+            <option key={sector} value={sector}>{sector}</option>
           ))}
         </select>
 
@@ -304,16 +287,7 @@ export default function App() {
                   <div style={{ color: scoreColor(c.score), fontWeight: 700 }}>#{c.score}</div>
                 </div>
 
-                <div
-                  style={{
-                    ...tag,
-                    display: "inline-block",
-                    marginTop: 10,
-                    padding: "4px 8px",
-                    borderRadius: 999,
-                    fontSize: 12
-                  }}
-                >
+                <div style={{ ...tag, display: "inline-block", marginTop: 10, padding: "4px 8px", borderRadius: 999, fontSize: 12 }}>
                   {c.opportunityType}
                 </div>
 
@@ -342,26 +316,14 @@ export default function App() {
           <div style={{ marginBottom: 20 }}>
             <h3>Sinyaller</h3>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {(selected.signals || []).length ? (
-                selected.signals.map((signal) => {
-                  const tag = signalStyle(signal);
-                  return (
-                    <span
-                      key={signal}
-                      style={{
-                        ...tag,
-                        padding: "6px 10px",
-                        borderRadius: 999,
-                        fontSize: 12
-                      }}
-                    >
-                      {signal}
-                    </span>
-                  );
-                })
-              ) : (
-                <span style={{ color: "#94a3b8" }}>Sinyal bulunamadı</span>
-              )}
+              {(selected.signals || []).length ? selected.signals.map((signal) => {
+                const tag = signalStyle(signal);
+                return (
+                  <span key={signal} style={{ ...tag, padding: "6px 10px", borderRadius: 999, fontSize: 12 }}>
+                    {signal}
+                  </span>
+                );
+              }) : <span style={{ color: "#94a3b8" }}>Sinyal bulunamadı</span>}
             </div>
           </div>
 
@@ -382,18 +344,14 @@ export default function App() {
             <div style={{ background: "#111827", border: "1px solid #334155", borderRadius: 12, padding: 14 }}>
               <h3 style={{ marginTop: 0 }}>Önerilen eğitim başlıkları</h3>
               <ul style={{ paddingLeft: 18, marginBottom: 0 }}>
-                {trainingTopics.map((item) => (
-                  <li key={item} style={{ marginBottom: 6 }}>{item}</li>
-                ))}
+                {trainingTopics.map((item) => <li key={item} style={{ marginBottom: 6 }}>{item}</li>)}
               </ul>
             </div>
 
             <div style={{ background: "#111827", border: "1px solid #334155", borderRadius: 12, padding: 14 }}>
               <h3 style={{ marginTop: 0 }}>Önerilen işe alım rolleri</h3>
               <ul style={{ paddingLeft: 18, marginBottom: 0 }}>
-                {hiringRoles.map((item) => (
-                  <li key={item} style={{ marginBottom: 6 }}>{item}</li>
-                ))}
+                {hiringRoles.map((item) => <li key={item} style={{ marginBottom: 6 }}>{item}</li>)}
               </ul>
             </div>
           </div>
@@ -402,16 +360,7 @@ export default function App() {
             <h3 style={{ marginTop: 0 }}>Hedeflenecek kişi rolleri</h3>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {targetRoles.map((item) => (
-                <span
-                  key={item}
-                  style={{
-                    background: "#082f49",
-                    color: "#38bdf8",
-                    padding: "6px 10px",
-                    borderRadius: 999,
-                    fontSize: 12
-                  }}
-                >
+                <span key={item} style={{ background: "#082f49", color: "#38bdf8", padding: "6px 10px", borderRadius: 999, fontSize: 12 }}>
                   {item}
                 </span>
               ))}
