@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Papa from "papaparse";
 
 const starterCompanies = [
@@ -91,7 +91,23 @@ export default function App() {
               opportunityType,
               note: row.Not || "Yüklenen şirket verisi üzerinden otomatik analiz oluşturuldu.",
             };
+const fetchTrendingCompanies = async () => {
+  try {
+    const response = await fetch("/api/trending");
+    const data = await response.json();
 
+    if (Array.isArray(data) && data.length > 0) {
+      setCompanies(data);
+      setSelected(data[0]);
+      setQuery("");
+    } else {
+      alert("Trend şirket verisi alınamadı.");
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Trend şirketler alınırken hata oluştu.");
+  }
+};
             return {
               ...company,
               message: buildMessage(company)
