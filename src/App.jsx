@@ -143,7 +143,21 @@ const fetchTrendingCompanies = async () => {
           }}
         />
 
-        <input type="file" accept=".csv" onChange={handleFileUpload} />
+<button
+  onClick={fetchTrendingCompanies}
+  style={{
+    padding: "10px 14px",
+    borderRadius: 8,
+    border: "1px solid #ddd",
+    background: "#0f62fe",
+    color: "#fff",
+    cursor: "pointer"
+  }}
+>
+  Trend şirketleri getir
+</button>
+
+<input type="file" accept=".csv" onChange={handleFileUpload} />
       </div>
 
       <div style={{ marginBottom: 16, fontSize: 14, color: "#555" }}>
