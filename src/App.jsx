@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
+import Papa from "papaparse";
 
-const companies = [
+const starterCompanies = [
   {
     id: 1,
     name: "Papara",
@@ -39,9 +40,14 @@ function scoreColor(score) {
   return "#2ec4b6";
 }
 
+function buildMessage(company) {
+  return `Merhaba, ${company.name} tarafında özellikle ${company.sector} sektöründeki büyüme dinamikleri doğrultusunda ${company.opportunityType.toLowerCase()} alanında destek sunabileceğimizi düşünüyorum. Uygun olursa kısa bir görüşmede paylaşmak isterim.`;
+}
+
 export default function App() {
+  const [companies, setCompanies] = useState(starterCompanies);
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState(companies[0]);
+  const [selected, setSelected] = useState(starterCompanies[0]);
 
   const filtered = useMemo(() => {
     return companies.filter(
@@ -50,24 +56,83 @@ export default function App() {
         c.sector.toLowerCase().includes(query.toLowerCase()) ||
         c.opportunityType.toLowerCase().includes(query.toLowerCase())
     );
-  }, [query]);
+  }, [query, companies]);
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        const parsed = (results.data || [])
+          .filter((row) => row.SirketAdi)
+          .map((row, index) => {
+            const sector = row.Sektor || "Genel";
+            const score = Math.floor(Math.random() * 25) + 70;
+
+            let opportunityType = "Eğitim";
+            if (sector.toLowerCase().includes("fintech")) {
+              opportunityType = "İşe Alım + Eğitim";
+            } else if (sector.toLowerCase().includes("oyun")) {
+              opportunityType = "Eğitim";
+            } else if (sector.toLowerCase().includes("enerji")) {
+              opportunityType = "Eğitim";
+            } else {
+              opportunityType = "İşe Alım + Eğitim";
+            }
+
+            const company = {
+              id: index + 100,
+              name: row.SirketAdi,
+              sector,
+              score,
+              opportunityType,
+              note: row.Not || "Yüklenen şirket verisi üzerinden otomatik analiz oluşturuldu.",
+            };
+
+            return {
+              ...company,
+              message: buildMessage(company)
+            };
+          });
+
+        if (parsed.length > 0) {
+          setCompanies(parsed);
+          setSelected(parsed[0]);
+          setQuery("");
+          alert("CSV başarıyla yüklendi.");
+        } else {
+          alert("Geçerli veri bulunamadı. CSV'de SirketAdi ve Sektor kolonları olmalı.");
+        }
+      }
+    });
+  };
 
   return (
     <div style={{ fontFamily: "Arial", padding: 20, background: "#f5f7fb", minHeight: "100vh" }}>
       <h1 style={{ marginBottom: 20 }}>Satış İstihbarat Paneli</h1>
 
-      <input
-        placeholder="Şirket ara..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        style={{
-          padding: 10,
-          width: "100%",
-          marginBottom: 20,
-          borderRadius: 8,
-          border: "1px solid #ddd"
-        }}
-      />
+      <div style={{ display: "flex", gap: 12, marginBottom: 16, alignItems: "center", flexWrap: "wrap" }}>
+        <input
+          placeholder="Şirket ara..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          style={{
+            padding: 10,
+            width: 320,
+            borderRadius: 8,
+            border: "1px solid #ddd"
+          }}
+        />
+
+        <input type="file" accept=".csv" onChange={handleFileUpload} />
+      </div>
+
+      <div style={{ marginBottom: 16, fontSize: 14, color: "#555" }}>
+        CSV formatı: <b>SirketAdi,Sektor,Not</b>
+      </div>
 
       <div style={{ display: "flex", gap: 20 }}>
         <div style={{ width: "40%" }}>
@@ -87,6 +152,7 @@ export default function App() {
               <b>{c.name}</b>
               <div>{c.sector}</div>
               <div style={{ color: scoreColor(c.score) }}>Skor: {c.score}</div>
+              <div style={{ fontSize: 13, marginTop: 6 }}>{c.opportunityType}</div>
             </div>
           ))}
         </div>
